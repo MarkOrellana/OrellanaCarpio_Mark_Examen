@@ -7,9 +7,8 @@ Created on Thu Jun  4 09:43:53 2020
 
 import time
 import random
-import functools
 from mpi4py import MPI
-import numpy as np
+import multiprocessing
 
 def normalize_vector_sequential(ar):
     result = []
@@ -55,8 +54,22 @@ def normalize_vector_parallel():
         raiz = squared_sum**(.5)
         comm.send(raiz,0)
         
-def normalize_vector_parallel1():
-    ar_count=4000000
+def normalize_vector_parallel1(ar):
+    result = []
+    squared_sum = 0
+    for n in ar:
+        squared_sum += n * n
+    raiz = squared_sum**(.5)
+    for n in ar:
+        result.append(n/raiz)
+    return result
+
+pool = multiprocessing.Pool(8)
+globalData = pool.map(normalize_vector_parallel1, globalData)
+pool.close()
+pool.join()
+print("Global data:", globalData)
+        
     
         
 if __name__ == '__main__':
